@@ -2,6 +2,13 @@ import { useState, useEffect } from 'react'
 
 // useEffect for localStorage ko lagi setItem in local storage [[[everytime items is changed]]]
 
+
+
+
+
+
+
+
 // get all data from localStorage 
 const getLocalStorageData = () => {
     //localStorage ma string ma hunxa data aba telai array leuna pary JSON.parse le leuna ta Object ma leuxa tara kei hunna array ma update hunxa
@@ -13,43 +20,78 @@ const getLocalStorageData = () => {
     }
 }
 
+
+
+
+
+
+
+
 function ToDo() {
 
     const [input, setInput] = useState("");   // yo GET 
     const [items, setItems] = useState(getLocalStorageData());   // Yo CREATE in array and ADD items
+    const [toggle, setToggle] = useState(true);
+    const [isEditId, setIsEditId] = useState(null);   // updated Id ko lagi
+
+
+
+
 
 // CREATE
     const AddItems = () => {
 // READ
         if(!input){                        // Get
             alert("Please fill the data")
+        }else if(input && !toggle){
+            setItems(
+
+                items.map((elem) => {
+                    if(elem.id === isEditId){
+                        return {...elem, name: input}  // id ani name
+                    }
+                    return elem;
+                })
+
+            )
+            setToggle(true);
+            setInput("");
+            setIsEditId(null);
+        
         }else{
-            setItems([...items, input]);         // Create
+            const inputData = { id: new Date().getTime().toString(), name: input}; 
+            setItems([...items, inputData]);         // Create
             setInput("");
         }
     }
+
+
+
+
 // UPDATE
     const UpdateItems = (index) => {
-       
-            items.map((elemValue, id) => {
-                if(index === id){
-                    setInput(elemValue);
-                    elemValue = input;
-                }
-            })
-            setItems(items);
-            setInput("");
-        
+       const updateId = items.find((elem) => {
+            return index === elem.id;
+           });
+        setToggle(false);
+        setInput(updateId.name);
+        setIsEditId(updateId.id);
     }
+
+
+
 
 // DELETE
     const DeleteItems = (index) => {
-        const deletedItems = items.filter((elemValue, id) => {
-            return index !== id;
+        const deletedItems = items.filter((elemValue) => {
+            return index !== elemValue.id;
         })
         setItems(deletedItems);
     }
-    
+
+
+
+
 //DELETE ALL
     const RemoveAll = () => {
         setItems([]);
@@ -67,7 +109,7 @@ function ToDo() {
     <>
 
 
-      <div className='bg-white w-full h-screen p-28 rounded-lg'>
+      <div className='bg-white w-full h-auto p-28 rounded-lg'>
 
 
 
@@ -82,22 +124,26 @@ function ToDo() {
                         onChange={(event)=> setInput(event.target.value)
                         }
                />
-                <button className='bg-white text-black'><i className="fa-solid fa-plus" 
+                {
+                toggle ? <button className='bg-white text-black'><i className="fa-solid fa-plus" 
+                onClick={AddItems}></i>
+                </button> :   <button className='bg-white text-black'><i className="fa-solid fa-pen" 
                 onClick={AddItems}></i>
                 </button>
+                }
                </div>
                 
 
             <div className="bg-white my-5">
                 {
-                items.map((elemValue, index)=> (
+                items.map((elemValue)=> (
                                                                             // yo khyal gara hai key={index}
-                    <div className="flex items-center justify-between my-3" key={index}>
-                    <h2 className="ml-2">{elemValue}</h2>
+                    <div className="flex items-center justify-between my-3" key={elemValue.id}>
+                    <h2 className="ml-2">{elemValue.name}</h2>
                     <div className="flex">
-                        <button className="ml-4"><i className="fa-solid fa-pen" onClick={() => UpdateItems(index) }></i></button>
+                        <button className="ml-4"><i className="fa-solid fa-pen" onClick={() => UpdateItems(elemValue.id) }></i></button>
                                                                                             {/* id wala ma () => {} hai  */}
-                        <button className="ml-4"><i className="fa-solid fa-trash" onClick={() => DeleteItems(index) }></i></button>     
+                        <button className="ml-4"><i className="fa-solid fa-trash" onClick={() => DeleteItems(elemValue.id) }></i></button>     
                     </div>
                     </div>
                 )
